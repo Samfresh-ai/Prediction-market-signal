@@ -109,10 +109,13 @@ export function runDetector(market: Market, evidenceItems: EvidenceItem[]): Dete
     reasonCodes.push("MEANINGFUL_GAP");
   }
 
+  const formattedTargetPrice =
+    targetPrice >= 1 ? targetPrice.toLocaleString(undefined, { maximumFractionDigits: 2 }) : targetPrice.toFixed(4).replace(/0+$/, "").replace(/\.$/, "");
+
   const thesis =
     edge >= 0
-      ? `Coinbase data puts ${parsedMarket.assetSymbol} at $${spotPrice.toFixed(2)} against a $${targetPrice.toFixed(0)} threshold, which implies the market may still be pricing in outdated downside risk.`
-      : `Coinbase data suggests the yes-case is being priced too aggressively relative to the current ${parsedMarket.assetSymbol} spot of $${spotPrice.toFixed(2)} and the $${targetPrice.toFixed(0)} threshold.`;
+      ? `Coinbase data puts ${parsedMarket.assetSymbol} at $${spotPrice.toFixed(2)} against a $${formattedTargetPrice} threshold, which implies the market may still be pricing in outdated downside risk.`
+      : `Coinbase data suggests the yes-case is being priced too aggressively relative to the current ${parsedMarket.assetSymbol} spot of $${spotPrice.toFixed(2)} and the $${formattedTargetPrice} threshold.`;
 
   return {
     status,

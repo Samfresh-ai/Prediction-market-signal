@@ -15,7 +15,7 @@ type LiveSummary = {
     freshEvidenceToday: number;
     averageLatencyMs: number;
     liveMode: string;
-    lastSyncAt: string;
+    lastSyncAt: string | null;
   };
   pipeline: Array<{
     type: string;
@@ -35,7 +35,7 @@ const fallbackSummary: LiveSummary = {
     freshEvidenceToday: 0,
     averageLatencyMs: 0,
     liveMode: "Interval scanning",
-    lastSyncAt: new Date(0).toISOString(),
+    lastSyncAt: null,
   },
   pipeline: [],
 };
@@ -101,6 +101,8 @@ export function LiveStatusBar() {
     };
   }, [summary.pipeline]);
 
+  const syncLabel = summary.stats.lastSyncAt ? `${formatRelativeTime(summary.stats.lastSyncAt, now)} sync` : "No recent sync";
+
   const cards = [
     {
       icon: Activity,
@@ -149,7 +151,7 @@ export function LiveStatusBar() {
           <span className={cn("inline-flex h-2.5 w-2.5 rounded-full", degraded ? "bg-amber-300" : "status-pulse bg-emerald-300")} />
           <span>{degraded ? "Using last known shell telemetry" : "Scanner telemetry live"}</span>
         </div>
-        <span>{formatRelativeTime(summary.stats.lastSyncAt, now)} sync</span>
+        <span>{syncLabel}</span>
       </div>
       <div className="grid gap-3 xl:grid-cols-4">
         {cards.map((item) => {

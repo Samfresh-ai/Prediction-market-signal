@@ -44,6 +44,12 @@ async function fetchJson<T>(url: string) {
   return (await response.json()) as T;
 }
 
+function formatTargetPrice(targetPrice: number) {
+  return targetPrice >= 1
+    ? targetPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })
+    : targetPrice.toFixed(4).replace(/0+$/, "").replace(/\.$/, "");
+}
+
 function buildEvidenceSnapshots(market: Market, spotPrice: number, openPrice: number | null, high: number | null, low: number | null, volume: number | null) {
   const parsed = parsePriceMarket(market.title, market.description);
   const distance = parsed.targetPrice ? ((spotPrice - parsed.targetPrice) / parsed.targetPrice) * 100 : null;
@@ -52,6 +58,7 @@ function buildEvidenceSnapshots(market: Market, spotPrice: number, openPrice: nu
   const bucket = hourBucket();
   const relevance = parsed.assetSymbol && parsed.targetPrice ? 0.94 : 0.55;
   const now = new Date();
+  const formattedTargetPrice = parsed.targetPrice != null ? formatTargetPrice(parsed.targetPrice) : null;
 
   const snapshots: EvidenceSnapshot[] = [
     {
@@ -62,8 +69,8 @@ function buildEvidenceSnapshots(market: Market, spotPrice: number, openPrice: nu
       trustScore: 0.95,
       publishedAt: now,
       summary:
-        parsed.targetPrice != null && distance != null
-          ? `${parsed.assetSymbol ?? "Asset"} spot is $${spotPrice.toFixed(2)}, ${Math.abs(distance).toFixed(2)}% ${distance >= 0 ? "above" : "below"} the market target of $${parsed.targetPrice.toFixed(0)}.`
+        formattedTargetPrice != null && distance != null
+          ? `${parsed.assetSymbol ?? "Asset"} spot is $${spotPrice.toFixed(2)}, ${Math.abs(distance).toFixed(2)}% ${distance >= 0 ? "above" : "below"} the market target of $${formattedTargetPrice}.`
           : `Coinbase spot snapshot shows ${parsed.assetSymbol ?? "the asset"} at $${spotPrice.toFixed(2)}.`,
       relevanceScore: relevance,
       rawContent: JSON.stringify({
