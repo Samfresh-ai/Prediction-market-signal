@@ -76,16 +76,20 @@ export function LiveMonitor({
 
           const payload = (await response.json()) as { error?: string; marketsProcessed?: number; alreadyRunning?: boolean };
           if (!response.ok) {
-            setMessage(payload.error ?? "Live analysis failed.");
+            setMessage(payload.error ?? "Scanner refresh failed.");
             return;
           }
 
-          setMessage(payload.alreadyRunning ? "Analysis already in progress. Waiting for the current run to finish." : `Live analysis refreshed ${payload.marketsProcessed ?? 0} monitored markets.`);
+          setMessage(
+            payload.alreadyRunning
+              ? "Refresh already in progress. Waiting for the current scan to finish."
+              : `Scanner refreshed ${payload.marketsProcessed ?? 0} monitored markets.`,
+          );
           setLastRunAt(Date.now());
           setNextRunAt(Date.now() + autoRunMs);
           router.refresh();
         } catch {
-          setMessage("Live analysis failed.");
+          setMessage("Scanner refresh failed.");
         }
       });
     }, autoRunMs);
@@ -98,10 +102,10 @@ export function LiveMonitor({
   const displayMessage =
     message ??
     (enableAutoRun
-      ? "Live refresh and scheduled analysis are on."
+      ? "Live refresh and scheduled scanning are on."
       : enableAutoRefresh
-        ? "Auto refresh is on. Analysis runs are manual on this surface."
-        : "This surface is read-only live. Run analysis from the dashboard or command bar.");
+        ? "Auto refresh is on. Full scan runs stay manual on this surface."
+        : "This surface is live read-only. Refresh the full scan from the scanner or command bar when you want a new pass.");
 
   return (
     <div className="terminal-sheen panel-appear rounded-[24px] border border-[var(--border)] bg-[var(--panel-strong)] p-5">
@@ -109,19 +113,20 @@ export function LiveMonitor({
         <div>
           <div className="flex items-center gap-3">
             <span className="status-pulse inline-flex h-3 w-3 rounded-full bg-teal-700" />
-            <p className="text-xs uppercase tracking-[0.22em] text-[var(--muted)]">Live monitor</p>
+            <p className="text-xs uppercase tracking-[0.22em] text-[var(--muted)]">Scanner monitor</p>
           </div>
           <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{displayMessage}</p>
         </div>
         <div className="text-right">
-          <p className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">Next analysis run</p>
+          <p className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">Next scheduled scan</p>
           <p className="mt-2 font-mono text-2xl font-semibold">{modeLabel}</p>
           <p className="mt-2 text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
-            {enableAutoRefresh ? `Refresh ${Math.round(autoRefreshMs / 1000)}s` : "No auto refresh"} {enableAutoRun ? `• Run every ${Math.round(autoRunMs / 1000)}s` : "• Manual analysis mode"}
+            {enableAutoRefresh ? `Refresh ${Math.round(autoRefreshMs / 1000)}s` : "No auto refresh"}{" "}
+            {enableAutoRun ? `• Run every ${Math.round(autoRunMs / 1000)}s` : "• Manual scan mode"}
           </p>
         </div>
       </div>
-      {isPending ? <p className="mt-3 text-xs uppercase tracking-[0.18em] text-teal-800">Refreshing now...</p> : null}
+      {isPending ? <p className="mt-3 text-xs uppercase tracking-[0.18em] text-teal-800">Refreshing scanner...</p> : null}
     </div>
   );
 }

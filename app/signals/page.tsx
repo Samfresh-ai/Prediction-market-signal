@@ -20,9 +20,9 @@ export default async function SignalsPage() {
   return (
     <AppShell
       activePath="/signals"
-      eyebrow="Opportunities"
-      title="Signal lifecycle and opportunity board"
-      subtitle="Surface not just final signals, but watch candidates, rising confidence setups, contradicted theses, and stale scans that need refresh."
+      eyebrow="Signals"
+      title="Signal and watchlist board"
+      subtitle="Sort the scanner’s live signal queue by conviction, fair-value gap, and contradictory evidence rather than by backend pipeline stage alone."
     >
       <div className="space-y-8">
         <LiveMonitor />

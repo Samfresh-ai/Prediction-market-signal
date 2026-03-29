@@ -2,8 +2,8 @@ import Link from "next/link";
 import { Activity, CandlestickChart, ChartColumn, LayoutDashboard, Radar } from "lucide-react";
 
 const items = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/markets", label: "Markets", icon: CandlestickChart },
+  { href: "/", label: "Scanner", icon: LayoutDashboard },
+  { href: "/markets", label: "Coverage", icon: CandlestickChart },
   { href: "/signals", label: "Signals", icon: Radar },
   { href: "/activity", label: "Activity", icon: Activity },
 ];
@@ -18,12 +18,12 @@ export function SidebarNav({ activePath }: { activePath: string }) {
               <ChartColumn className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs uppercase tracking-[0.22em] text-[var(--muted)]">Base Intel</p>
-              <p className="text-lg font-semibold text-white">Odds Terminal</p>
+              <p className="text-xs uppercase tracking-[0.22em] text-[var(--muted)]">Prediction Signal</p>
+              <p className="text-lg font-semibold text-white">Scanner</p>
             </div>
           </div>
           <p className="mt-4 text-sm leading-7 text-[var(--muted)]">
-            Live market scanner for Base prediction intelligence, evidence mapping, and edge detection.
+            Limitless Exchange · Base prediction-market scanner for fair-value drift, conviction tags, and fast trade triage.
           </p>
         </div>
 
@@ -52,10 +52,11 @@ export function SidebarNav({ activePath }: { activePath: string }) {
       </div>
 
       <div className="rounded-3xl border border-[var(--border)] bg-[var(--panel-strong)] p-4 shadow-[var(--panel-shadow)]">
-        <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Expansion slots</p>
+        <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Coverage lanes</p>
         <div className="mt-4 space-y-3 text-sm text-[var(--muted)]">
-          <div className="rounded-2xl border border-dashed border-[var(--border)] px-3 py-3">Weather intel</div>
-          <div className="rounded-2xl border border-dashed border-[var(--border)] px-3 py-3">Football markets</div>
+          <div className="rounded-2xl border border-[var(--border)] bg-[rgba(255,255,255,0.92)] px-3 py-3 text-[var(--foreground)]">Crypto scanner live</div>
+          <div className="rounded-2xl border border-dashed border-[var(--border)] px-3 py-3">Stocks lane planned</div>
+          <div className="rounded-2xl border border-dashed border-[var(--border)] px-3 py-3">Commodities lane planned</div>
         </div>
       </div>
     </aside>

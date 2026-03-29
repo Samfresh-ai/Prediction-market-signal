@@ -1,13 +1,9 @@
-import { AppShell } from "@/components/app-shell";
 import { ActivityFeed } from "@/components/activity-feed";
-import { EmptyStatePanel } from "@/components/empty-state-panel";
+import { AppShell } from "@/components/app-shell";
 import { LiveMonitor } from "@/components/live-monitor";
-import { MarketTable } from "@/components/market-table";
-import { OpportunityCard } from "@/components/opportunity-card";
-import { RoadmapCard } from "@/components/roadmap-card";
-import { SystemHealthPanel } from "@/components/system-health-panel";
+import { ScannerSurface } from "@/components/scanner-surface";
+import { formatCompactNumber, formatDateTime } from "@/lib/utils";
 import { getDashboardView } from "@/server/intel";
-import { formatDateTime } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -17,88 +13,35 @@ export default async function HomePage() {
   return (
     <AppShell
       activePath="/"
-      eyebrow="Market Intelligence Terminal"
-      title="Live probability scanner for Base prediction markets"
-      subtitle="Track monitored markets, inspect fair-value drift, trace evidence quality, and watch the signal pipeline move from monitoring to evidence to conviction."
+      eyebrow="Prediction Signal"
+      title="Limitless Exchange · Base prediction-market scanner"
+      subtitle="Focused scanner for mispriced YES/NO odds, fair-value drift, and fast thesis triage across the current monitored market universe."
       statusSlot={
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          <HeroStat label="Markets monitored" value={String(data.stats.monitoredMarkets)} />
-          <HeroStat label="Active opportunities" value={String(data.stats.watchCount + data.stats.signalCount)} />
-          <HeroStat label="Last sync" value={formatDateTime(data.stats.lastSyncAt)} />
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+          <HeroStat label="Markets" value={String(data.stats.monitoredMarkets)} />
+          <HeroStat label="Signals" value={String(data.stats.signalCount)} />
+          <HeroStat label="Watching" value={String(data.stats.watchCount)} />
+          <HeroStat label="Volume (24h)" value={formatCompactNumber(data.stats.totalVolume24h)} />
+          <HeroStat label="Last Scan" value={formatDateTime(data.stats.lastSyncAt)} />
         </div>
       }
     >
       <div className="space-y-8">
         <LiveMonitor enableAutoRefresh enableAutoRun />
+        <ScannerSurface markets={data.markets} />
 
-        <section className="grid gap-4 xl:grid-cols-6">
-          <KpiCard label="Monitored markets" value={String(data.stats.monitoredMarkets)} />
-          <KpiCard label="Watch candidates" value={String(data.stats.watchCount)} />
-          <KpiCard label="Active signals" value={String(data.stats.signalCount)} />
-          <KpiCard label="Average confidence" value={`${Math.round(data.stats.averageConfidence * 100)}%`} />
-          <KpiCard label="Fresh evidence (24h)" value={String(data.stats.freshEvidenceToday)} />
-          <KpiCard label="Latency" value={`${data.stats.averageLatencyMs} ms`} />
-        </section>
-
-        <section className="grid gap-6 xl:grid-cols-[1.2fr_0.95fr_0.85fr]">
-          <div className="space-y-6">
-            <PanelTitle eyebrow="Scanner" title="Monitored markets" />
-            {data.markets.length === 0 ? (
-              <EmptyStatePanel
-                title="No monitored markets yet"
-                description="Run the pipeline once to populate the market scanner and lifecycle panels."
-              />
-            ) : (
-              <MarketTable markets={data.markets} />
-            )}
-          </div>
-
-          <div className="space-y-6">
-            <PanelTitle eyebrow="Opportunities" title="High-attention candidates" />
-            <div className="space-y-5">
-              {data.opportunities.map((item) => (
-                <OpportunityCard key={item.id} item={item} />
-              ))}
+        <section className="rounded-[32px] border border-[var(--border)] bg-[var(--panel)] p-6 shadow-[var(--panel-shadow)]">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.22em] text-[var(--muted)]">Recent activity</p>
+              <h2 className="mt-2 text-2xl font-semibold text-white">Latest scanner events</h2>
             </div>
+            <p className="max-w-2xl text-sm leading-7 text-[var(--muted)]">
+              Pipeline logs stay available here, but the main surface is centered on tradeable markets, not an operator dashboard.
+            </p>
           </div>
-
-          <div className="space-y-6">
-            <SystemHealthPanel health={data.health} />
-            <div className="rounded-[32px] border border-[var(--border)] bg-[var(--panel)] p-6 shadow-[var(--panel-shadow)]">
-              <PanelTitle eyebrow="Lifecycle" title="Signal progression" compact />
-              <div className="mt-5 space-y-4">
-                {data.lifecycleBreakdown.map((item) => (
-                  <div key={item.state}>
-                    <div className="mb-2 flex items-center justify-between text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
-                      <span>{item.state.replaceAll("_", " ")}</span>
-                      <span>{item.count}</span>
-                    </div>
-                    <div className="h-2.5 overflow-hidden rounded-full bg-[rgba(17,32,51,0.08)]">
-                      <div
-                        className="h-full rounded-full bg-[linear-gradient(90deg,#2fa2ff,#2ad28a)] transition-[width] duration-700"
-                        style={{ width: `${data.stats.monitoredMarkets === 0 ? 0 : (item.count / data.stats.monitoredMarkets) * 100}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-          <ActivityFeed items={data.activity} />
-          <div className="space-y-6">
-            <RoadmapCard
-              title="Weather intelligence lane"
-              subtitle="Ready placeholder for temperature, rainfall, and storm-driven markets once the second venue is connected."
-              note="Reserved expansion surface"
-            />
-            <RoadmapCard
-              title="Football market lane"
-              subtitle="Ready placeholder for match outcome, tournament, and player prop intelligence on a future venue integration."
-              note="Reserved expansion surface"
-            />
+          <div className="mt-6">
+            <ActivityFeed items={data.activity} />
           </div>
         </section>
       </div>
@@ -111,24 +54,6 @@ function HeroStat({ label, value }: { label: string; value: string }) {
     <div className="rounded-3xl border border-[var(--border)] bg-[var(--panel)] px-5 py-4 shadow-[var(--panel-shadow)]">
       <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">{label}</p>
       <p className="mt-2 text-xl font-semibold text-white">{value}</p>
-    </div>
-  );
-}
-
-function KpiCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-[28px] border border-[var(--border)] bg-[var(--panel)] p-5 shadow-[var(--panel-shadow)]">
-      <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">{label}</p>
-      <p className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-white">{value}</p>
-    </div>
-  );
-}
-
-function PanelTitle({ eyebrow, title, compact = false }: { eyebrow: string; title: string; compact?: boolean }) {
-  return (
-    <div className={compact ? "" : "mb-4"}>
-      <p className="text-xs uppercase tracking-[0.22em] text-[var(--muted)]">{eyebrow}</p>
-      <h2 className="mt-2 text-2xl font-semibold text-white">{title}</h2>
     </div>
   );
 }

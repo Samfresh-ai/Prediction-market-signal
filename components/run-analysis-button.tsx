@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
-export function RunAnalysisButton() {
+export function RunAnalysisButton({ compact = false }: { compact?: boolean }) {
   const router = useRouter();
   const [message, setMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -24,8 +24,8 @@ export function RunAnalysisButton() {
 
       setMessage(
         payload.alreadyRunning
-          ? "Analysis already in progress. Waiting for the active run to finish."
-          : `Analysis refreshed for ${payload.marketsProcessed ?? 0} markets.`,
+          ? "Scan already in progress. Waiting for the active refresh to finish."
+          : `Scanner refreshed across ${payload.marketsProcessed ?? 0} markets.`,
       );
       router.refresh();
     });
@@ -37,9 +37,12 @@ export function RunAnalysisButton() {
         type="button"
         onClick={onRun}
         disabled={isPending}
-        className="rounded-full border border-teal-800 bg-teal-800 px-5 py-3 text-sm font-semibold text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-60"
+        className={[
+          "rounded-full border border-teal-800 bg-teal-800 text-sm font-semibold text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-60",
+          compact ? "px-4 py-3" : "px-5 py-3",
+        ].join(" ")}
       >
-        {isPending ? "Running analysis..." : "Run Full Analysis"}
+        {isPending ? "Refreshing..." : compact ? "Refresh Scan" : "Refresh Full Scan"}
       </button>
       {message ? <p className="text-sm text-[var(--muted)]">{message}</p> : null}
     </div>

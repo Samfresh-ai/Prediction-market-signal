@@ -1,5 +1,7 @@
+import type { AssetSymbol } from "@/server/types";
+
 export type PriceMarketContext = {
-  assetSymbol: "BTC" | "ETH" | "SOL" | "XRP" | "DOGE" | null;
+  assetSymbol: AssetSymbol | null;
   assetName: string | null;
   quoteCurrency: "USD";
   targetPrice: number | null;
@@ -12,6 +14,13 @@ const assetAliases: Array<{ symbol: PriceMarketContext["assetSymbol"]; patterns:
   { symbol: "SOL", name: "Solana", patterns: [/\bsol\b/i, /\bsolana\b/i] },
   { symbol: "XRP", name: "XRP", patterns: [/\bxrp\b/i, /\bripple\b/i] },
   { symbol: "DOGE", name: "Dogecoin", patterns: [/\bdoge\b/i, /\bdogecoin\b/i] },
+  { symbol: "ADA", name: "Cardano", patterns: [/\bada\b/i, /\bcardano\b/i] },
+  { symbol: "AVAX", name: "Avalanche", patterns: [/\bavax\b/i, /\bavalanche\b/i] },
+  { symbol: "LINK", name: "Chainlink", patterns: [/\blink\b/i, /\bchainlink\b/i] },
+  { symbol: "LTC", name: "Litecoin", patterns: [/\bltc\b/i, /\blitecoin\b/i] },
+  { symbol: "BCH", name: "Bitcoin Cash", patterns: [/\bbch\b/i, /\bbitcoin cash\b/i] },
+  { symbol: "UNI", name: "Uniswap", patterns: [/\buni\b/i, /\buniswap\b/i] },
+  { symbol: "AAVE", name: "Aave", patterns: [/\baave\b/i] },
 ];
 
 function normalizeMagnitude(raw: number, magnitude?: string) {

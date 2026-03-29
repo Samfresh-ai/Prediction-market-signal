@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { LiveStatusBar } from "@/components/live-status-bar";
 import { SidebarNav } from "@/components/sidebar-nav";
+import { SiteFooter } from "@/components/site-footer";
 import { TopCommandBar } from "@/components/top-command-bar";
 
 export function AppShell({
@@ -38,6 +39,7 @@ export function AppShell({
           </div>
           <LiveStatusBar />
           <div className="px-8 py-8">{children}</div>
+          <SiteFooter />
         </main>
       </div>
     </div>

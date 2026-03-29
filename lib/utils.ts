@@ -8,8 +8,23 @@ export function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
-export function percent(value: number, digits = 1) {
+export function percent(value: number | null | undefined, digits = 1) {
+  if (value == null || !Number.isFinite(value)) {
+    return "N/A";
+  }
+
   return `${(value * 100).toFixed(digits)}%`;
+}
+
+export function formatCompactNumber(value: number | null | undefined, digits = 1) {
+  if (value == null || !Number.isFinite(value)) {
+    return "N/A";
+  }
+
+  return new Intl.NumberFormat("en-US", {
+    notation: "compact",
+    maximumFractionDigits: digits,
+  }).format(value);
 }
 
 export function formatDateTime(value: Date | string | null | undefined) {

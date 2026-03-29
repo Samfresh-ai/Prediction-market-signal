@@ -5,9 +5,9 @@ export default function Loading() {
   return (
     <AppShell
       activePath="/"
-      eyebrow="Initializing terminal"
-      title="Loading market intelligence surfaces"
-      subtitle="Hydrating the dashboard, reconnecting the live scan loop, and preparing market panels."
+      eyebrow="Prediction Signal"
+      title="Loading scanner surfaces"
+      subtitle="Hydrating market cards, reconnecting live scan telemetry, and preparing the current market queue."
     >
       <LoadingSkeletons />
     </AppShell>

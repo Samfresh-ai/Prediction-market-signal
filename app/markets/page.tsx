@@ -13,9 +13,9 @@ export default async function MarketsPage() {
   return (
     <AppShell
       activePath="/markets"
-      eyebrow="Markets"
-      title="Coverage and market health"
-      subtitle="Inspect the full monitored universe, compare implied and fair probabilities, and identify which markets are stale, evaluating, contradicted, or actionable."
+      eyebrow="Coverage"
+      title="Monitored market universe"
+      subtitle="Review the broader scanner coverage set, compare YES pricing against fair value, and open any market for full thesis and invalidation context."
     >
       <div className="space-y-8">
         <LiveMonitor />

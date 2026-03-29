@@ -13,8 +13,8 @@ export default async function ActivityPage() {
     <AppShell
       activePath="/activity"
       eyebrow="Activity"
-      title="Live scan stream and system log"
-      subtitle="Expose the full analysis loop so the product feels continuously active even when no final signal has fired."
+      title="Live scan stream"
+      subtitle="Keep the underlying polling, evidence, and detector history visible without making the homepage feel like an ops console."
     >
       <div className="space-y-8">
         <LiveMonitor />
