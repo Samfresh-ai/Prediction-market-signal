@@ -22,9 +22,9 @@ export default async function HomePage() {
           <HeroStat label="Signals" value={String(data.stats.signalCount)} />
           <HeroStat label="Watching" value={String(data.stats.watchCount)} />
           <HeroStat
-            label="Market observations"
+            label="Listings fetched"
             value={formatCompactNumber(data.stats.marketObservations.allTime)}
-            detail={`${formatCompactNumber(data.stats.marketObservations.last24Hours)} last 24h · repeat snapshots counted`}
+            detail={`${formatCompactNumber(data.stats.marketObservations.last24Hours)} in the last 24h · cumulative across refreshes`}
           />
           <HeroStat label="Last Scan" value={formatDateTime(data.stats.lastSyncAt)} />
         </div>

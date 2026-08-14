@@ -154,9 +154,9 @@ For a prebuilt CLI deploy, run `netlify build --context production`, then publis
 
 Protect scheduled requests with `CRON_SECRET` and send it from the scheduler. The current application also permits same-origin browser POST requests so the product's manual refresh control remains usable without exposing that secret.
 
-## Usage metric
+## Activity metric
 
-The homepage reports **market observations**, calculated from successful `poll_markets` ingestion logs. Each Limitless market is deduplicated within a scan; the same market observed in a later scan counts again. This is operational product activity, not a claim about unique markets, users, visitors, trades, or prediction accuracy.
+The homepage reports **listings fetched**, calculated from successful `poll_markets` ingestion logs. Each successful refresh adds the number of market listings returned by Limitless; the same listing can be counted again in a later refresh. This is operational product activity, not a claim about unique markets, users, visitors, trades, or prediction accuracy.
 
 ## Data model
 
