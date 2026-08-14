@@ -1,0 +1,16 @@
+[build]
+  command = "pnpm build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "20"
+  PNPM_VERSION = "11.5.0"
+
+[functions]
+  included_files = ["!**/.env", "!**/.env.*"]
+
+[functions."refresh-scanner"]
+  schedule = "*/30 * * * *"
+
+[[plugins]]
+  package = "./netlify/plugins/verify-no-env"

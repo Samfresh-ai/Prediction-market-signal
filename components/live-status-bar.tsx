@@ -14,6 +14,12 @@ type LiveSummary = {
     averageConfidence: number;
     freshEvidenceToday: number;
     averageLatencyMs: number;
+    marketObservations: {
+      allTime: number;
+      last24Hours: number;
+      successfulScans: number;
+      latestObservedAt: string | null;
+    };
     liveMode: string;
     lastSyncAt: string | null;
   };
@@ -34,6 +40,12 @@ const fallbackSummary: LiveSummary = {
     averageConfidence: 0,
     freshEvidenceToday: 0,
     averageLatencyMs: 0,
+    marketObservations: {
+      allTime: 0,
+      last24Hours: 0,
+      successfulScans: 0,
+      latestObservedAt: null,
+    },
     liveMode: "Interval scanning",
     lastSyncAt: null,
   },

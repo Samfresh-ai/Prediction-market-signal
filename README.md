@@ -136,11 +136,27 @@ pnpm db:seed
 
 If you deploy through GitHub or Vercel CI, run migrations in CI or via a one-off shell in the target environment.
 
+### Netlify
+
+The repository also includes `netlify.toml` for the public Netlify deployment. It builds the Next.js server-rendered app with Node 20 and schedules `netlify/functions/refresh-scanner.mjs` every 30 minutes.
+
+Set `DATABASE_URL`, `DIRECT_URL`, `APP_URL`, and a non-empty `CRON_SECRET` in the production environment before deploying. The scheduled function sends the secret server-to-server; the in-product refresh control is limited to same-origin browser POST requests.
+
+Deploy from CI or a clean checkout that contains no `.env` files. The local `verify-no-env` build plugin fails the build if an environment file reaches Netlify's internal function source.
+
+For a prebuilt CLI deploy, run `netlify build --context production`, then publish `.netlify/static` with `.netlify/functions`. Deploying `.next` directly skips the static-assets directory produced by the Netlify Next.js runtime.
+
 ### Scheduled refresh
 
 `vercel.json` includes a 30-minute schedule hitting `/api/jobs/run-all`.
 
-If you need to protect scheduled requests, set `CRON_SECRET` and send it from your scheduler. If you use Vercel cron directly, leaving `CRON_SECRET` blank is the simplest path.
+`netlify.toml` schedules the equivalent server-side refresh every 30 minutes on Netlify.
+
+Protect scheduled requests with `CRON_SECRET` and send it from the scheduler. The current application also permits same-origin browser POST requests so the product's manual refresh control remains usable without exposing that secret.
+
+## Usage metric
+
+The homepage reports **market observations**, calculated from successful `poll_markets` ingestion logs. Each Limitless market is deduplicated within a scan; the same market observed in a later scan counts again. This is operational product activity, not a claim about unique markets, users, visitors, trades, or prediction accuracy.
 
 ## Data model
 

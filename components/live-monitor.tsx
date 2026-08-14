@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 type LiveMonitorProps = {
   autoRefreshMs?: number;
   autoRunMs?: number;
+  backgroundScheduleLabel?: string;
   enableAutoRefresh?: boolean;
   enableAutoRun?: boolean;
 };
@@ -21,6 +22,7 @@ function formatCountdown(targetAt: number, now: number) {
 export function LiveMonitor({
   autoRefreshMs = 60_000,
   autoRunMs = 60_000,
+  backgroundScheduleLabel,
   enableAutoRefresh = false,
   enableAutoRun = false,
 }: LiveMonitorProps) {
@@ -98,14 +100,16 @@ export function LiveMonitor({
   }, [autoRunMs, enableAutoRun, lastRunAt, router, startTransition]);
 
   const countdown = useMemo(() => formatCountdown(nextRunAt, now), [nextRunAt, now]);
-  const modeLabel = enableAutoRun ? countdown : "MANUAL";
+  const modeLabel = enableAutoRun ? countdown : backgroundScheduleLabel?.toUpperCase() ?? "MANUAL";
   const displayMessage =
     message ??
     (enableAutoRun
       ? "Live refresh and scheduled scanning are on."
-      : enableAutoRefresh
-        ? "Auto refresh is on. Full scan runs stay manual on this surface."
-        : "This surface is live read-only. Refresh the full scan from the scanner or command bar when you want a new pass.");
+      : backgroundScheduleLabel
+        ? `Background scanning runs ${backgroundScheduleLabel.toLowerCase()}. This page refreshes automatically, and manual full scans remain available.`
+        : enableAutoRefresh
+          ? "Auto refresh is on. Full scan runs stay manual on this surface."
+          : "This surface is live read-only. Refresh the full scan from the scanner or command bar when you want a new pass.");
 
   return (
     <div className="terminal-sheen panel-appear rounded-[24px] border border-[var(--border)] bg-[var(--panel-strong)] p-5">
@@ -118,11 +122,17 @@ export function LiveMonitor({
           <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{displayMessage}</p>
         </div>
         <div className="text-right">
-          <p className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">Next scheduled scan</p>
+          <p className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
+            {enableAutoRun ? "Next scheduled scan" : "Scan cadence"}
+          </p>
           <p className="mt-2 font-mono text-2xl font-semibold">{modeLabel}</p>
           <p className="mt-2 text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
             {enableAutoRefresh ? `Refresh ${Math.round(autoRefreshMs / 1000)}s` : "No auto refresh"}{" "}
-            {enableAutoRun ? `• Run every ${Math.round(autoRunMs / 1000)}s` : "• Manual scan mode"}
+            {enableAutoRun
+              ? `• Run every ${Math.round(autoRunMs / 1000)}s`
+              : backgroundScheduleLabel
+                ? "• Server scheduled"
+                : "• Manual scan mode"}
           </p>
         </div>
       </div>

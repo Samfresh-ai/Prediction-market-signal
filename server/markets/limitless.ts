@@ -1,6 +1,7 @@
 import { monitoredMarkets } from "@/server/config/markets";
 import { env } from "@/server/config/env";
 import { parsePriceMarket } from "@/server/markets/parse";
+import { toPlainText } from "@/lib/utils";
 
 export type NormalizedMarket = {
   externalId: string;
@@ -100,6 +101,7 @@ function extractProbability(record: LooseMarketRecord) {
 function normalizeMarket(raw: LooseMarketRecord): NormalizedMarket | null {
   const slug = String(raw.slug ?? raw.id ?? raw.address ?? "").trim();
   const title = String(raw.title ?? raw.question ?? raw.name ?? "").trim();
+  const description = toPlainText(String(raw.description ?? raw.subtitle ?? raw.details ?? ""));
 
   if (!slug || !title) {
     return null;
@@ -113,7 +115,7 @@ function normalizeMarket(raw: LooseMarketRecord): NormalizedMarket | null {
   return {
     externalId: slug,
     title,
-    description: String(raw.description ?? raw.subtitle ?? raw.details ?? "") || null,
+    description: description || null,
     venue: "Limitless",
     category: Array.isArray(raw.categories)
       ? String(raw.categories[0] ?? "") || null

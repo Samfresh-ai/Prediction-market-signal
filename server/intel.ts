@@ -1,6 +1,6 @@
 import type { Prisma } from "@prisma/client";
 
-import { clamp, formatDateTime, formatRelativeTime, percent } from "@/lib/utils";
+import { clamp, formatDateTime, formatRelativeTime, percent, toPlainText } from "@/lib/utils";
 import { prisma, withPrismaReconnect } from "@/server/db/client";
 import { toNumber } from "@/server/db/helpers";
 import { parsePriceMarket } from "@/server/markets/parse";
@@ -111,6 +111,52 @@ const recentSignalsQuery = {
   orderBy: { createdAt: "desc" },
   take: 16,
 } satisfies Prisma.SignalFindManyArgs;
+
+type MarketObservationUsage = {
+  allTime: number;
+  last24Hours: number;
+  successfulScans: number;
+  latestObservedAt: Date | null;
+};
+
+type MarketObservationAggregate = {
+  all_time: bigint | number | string | null;
+  last_24_hours: bigint | number | string | null;
+  successful_scans: bigint | number | string | null;
+  latest_observed_at: Date | string | null;
+};
+
+function toSafeCount(value: bigint | number | string | null | undefined) {
+  const numericValue = Number(value ?? 0);
+  return Number.isSafeInteger(numericValue) && numericValue >= 0 ? numericValue : 0;
+}
+
+async function loadMarketObservationUsage(): Promise<MarketObservationUsage> {
+  const [aggregate] = await prisma.$queryRaw<MarketObservationAggregate[]>`
+    SELECT
+      COALESCE(SUM((metadata->>'totalFetched')::bigint), 0) AS all_time,
+      COALESCE(
+        SUM((metadata->>'totalFetched')::bigint) FILTER (
+          WHERE COALESCE("completedAt", "startedAt") >= NOW() - INTERVAL '24 hours'
+        ),
+        0
+      ) AS last_24_hours,
+      COUNT(*) AS successful_scans,
+      MAX(COALESCE("completedAt", "startedAt")) AS latest_observed_at
+    FROM "IngestionLog"
+    WHERE type = 'poll_markets'
+      AND status = 'success'
+      AND jsonb_typeof(metadata->'totalFetched') = 'number'
+      AND (metadata->>'totalFetched')::numeric >= 0
+  `;
+
+  return {
+    allTime: toSafeCount(aggregate?.all_time),
+    last24Hours: toSafeCount(aggregate?.last_24_hours),
+    successfulScans: toSafeCount(aggregate?.successful_scans),
+    latestObservedAt: aggregate?.latest_observed_at ? new Date(aggregate.latest_observed_at) : null,
+  };
+}
 
 function hoursSince(date: Date | null | undefined) {
   if (!date) {
@@ -287,7 +333,7 @@ function buildMarketRow(market: MarketWithRelations): MarketScannerRow {
     id: market.id,
     externalId: market.externalId,
     title: market.title,
-    description: market.description,
+    description: toPlainText(market.description) || null,
     venue: market.venue,
     category: market.category,
     scannerCategory,
@@ -441,6 +487,7 @@ function buildDashboardStats(
   markets: MarketScannerRow[],
   marketsRaw: Awaited<ReturnType<typeof loadMarkets>>,
   logsRaw: Awaited<ReturnType<typeof prisma.ingestionLog.findMany>>,
+  marketObservations: MarketObservationUsage,
 ) {
   const watchCount = markets.filter((market) => market.signalState === "watch").length;
   const signalCount = markets.filter((market) => market.signalState === "signal").length;
@@ -465,20 +512,29 @@ function buildDashboardStats(
     averageConfidence,
     freshEvidenceToday,
     totalVolume24h,
+    marketObservations,
     averageLatencyMs: health.averageLatencyMs,
     liveMode: "Interval scanning",
-    lastSyncAt: markets[0]?.lastScanAt ?? logsRaw[0]?.completedAt ?? logsRaw[0]?.startedAt ?? new Date(),
+    lastSyncAt:
+      marketObservations.latestObservedAt ??
+      logsRaw[0]?.completedAt ??
+      logsRaw[0]?.startedAt ??
+      markets[0]?.lastScanAt ??
+      null,
   };
 }
 
 export async function getDashboardView() {
   return withPrismaReconnect(async () => {
-    const marketsRaw = await loadMarkets();
-    const logsRaw = await prisma.ingestionLog.findMany({ ...recentLogsQuery, take: 20 });
+    const [marketsRaw, logsRaw, marketObservations] = await Promise.all([
+      loadMarkets(),
+      prisma.ingestionLog.findMany({ ...recentLogsQuery, take: 20 }),
+      loadMarketObservationUsage(),
+    ]);
     const activity = await loadRecentActivity(logsRaw);
 
     const markets = marketsRaw.map(buildMarketRow);
-    const stats = buildDashboardStats(markets, marketsRaw, logsRaw);
+    const stats = buildDashboardStats(markets, marketsRaw, logsRaw, marketObservations);
     const health = buildHealth(logsRaw);
 
     return {
@@ -508,11 +564,14 @@ export async function getDashboardView() {
 
 export async function getLiveSummary() {
   return withPrismaReconnect(async () => {
-    const marketsRaw = await loadMarkets();
-    const logsRaw = await prisma.ingestionLog.findMany({ ...recentLogsQuery, take: 18 });
+    const [marketsRaw, logsRaw, marketObservations] = await Promise.all([
+      loadMarkets(),
+      prisma.ingestionLog.findMany({ ...recentLogsQuery, take: 18 }),
+      loadMarketObservationUsage(),
+    ]);
 
     const markets = marketsRaw.map(buildMarketRow);
-    const stats = buildDashboardStats(markets, marketsRaw, logsRaw);
+    const stats = buildDashboardStats(markets, marketsRaw, logsRaw, marketObservations);
     const health = buildHealth(logsRaw);
 
     return {

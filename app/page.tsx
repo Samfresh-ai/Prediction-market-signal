@@ -21,13 +21,17 @@ export default async function HomePage() {
           <HeroStat label="Markets" value={String(data.stats.monitoredMarkets)} />
           <HeroStat label="Signals" value={String(data.stats.signalCount)} />
           <HeroStat label="Watching" value={String(data.stats.watchCount)} />
-          <HeroStat label="Volume (24h)" value={formatCompactNumber(data.stats.totalVolume24h)} />
+          <HeroStat
+            label="Market observations"
+            value={formatCompactNumber(data.stats.marketObservations.allTime)}
+            detail={`${formatCompactNumber(data.stats.marketObservations.last24Hours)} last 24h · repeat snapshots counted`}
+          />
           <HeroStat label="Last Scan" value={formatDateTime(data.stats.lastSyncAt)} />
         </div>
       }
     >
       <div className="space-y-8">
-        <LiveMonitor enableAutoRefresh enableAutoRun />
+        <LiveMonitor enableAutoRefresh backgroundScheduleLabel="Every 30 minutes" />
         <ScannerSurface markets={data.markets} />
 
         <section className="rounded-[32px] border border-[var(--border)] bg-[var(--panel)] p-6 shadow-[var(--panel-shadow)]">
@@ -49,11 +53,12 @@ export default async function HomePage() {
   );
 }
 
-function HeroStat({ label, value }: { label: string; value: string }) {
+function HeroStat({ label, value, detail }: { label: string; value: string; detail?: string }) {
   return (
     <div className="rounded-3xl border border-[var(--border)] bg-[var(--panel)] px-5 py-4 shadow-[var(--panel-shadow)]">
       <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">{label}</p>
       <p className="mt-2 text-xl font-semibold text-white">{value}</p>
+      {detail ? <p className="mt-2 text-[11px] leading-5 text-[var(--muted)]">{detail}</p> : null}
     </div>
   );
 }

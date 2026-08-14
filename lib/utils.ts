@@ -65,6 +65,25 @@ export function formatRelativeTime(value: Date | string | null | undefined, now 
   return formatter.format(deltaDays, "day");
 }
 
+export function toPlainText(value: string | null | undefined) {
+  if (!value) {
+    return "";
+  }
+
+  return value
+    .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<\/(?:p|div|li|h[1-6])>/gi, " ")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&quot;/gi, '"')
+    .replace(/(?:&#39;|&apos;)/gi, "'")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export function hoursUntil(date: Date | null | undefined) {
   if (!date) {
     return null;

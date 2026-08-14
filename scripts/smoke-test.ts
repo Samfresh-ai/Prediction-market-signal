@@ -11,6 +11,11 @@ async function main() {
     throw new Error("No markets returned by dashboard view");
   }
 
+  const marketWithMarkup = dashboard.markets.find((market) => /<\/?[a-z][^>]*>/i.test(market.description ?? ""));
+  if (marketWithMarkup) {
+    throw new Error(`Market description contains raw HTML: ${marketWithMarkup.id}`);
+  }
+
   const marketId = dashboard.markets[0].id;
   const marketsOverview = await getMarketsOverviewView();
   const signalsView = await getSignalsView();
@@ -41,6 +46,31 @@ async function main() {
     signalRes.json(),
   ]);
 
+  const marketObservations = dashboard.stats.marketObservations;
+  for (const [name, value] of Object.entries({
+    allTime: marketObservations.allTime,
+    last24Hours: marketObservations.last24Hours,
+    successfulScans: marketObservations.successfulScans,
+  })) {
+    if (!Number.isSafeInteger(value) || value < 0) {
+      throw new Error(`Market observation metric ${name} must be a non-negative safe integer`);
+    }
+  }
+
+  if (
+    summaryJson.stats?.marketObservations?.allTime !== marketObservations.allTime ||
+    summaryJson.stats?.marketObservations?.last24Hours !== marketObservations.last24Hours
+  ) {
+    throw new Error("Dashboard and summary market-observation metrics do not match");
+  }
+
+  if (
+    marketObservations.latestObservedAt &&
+    dashboard.stats.lastSyncAt?.getTime() !== marketObservations.latestObservedAt.getTime()
+  ) {
+    throw new Error("Last scan must match the latest successful market observation");
+  }
+
   console.log(
     JSON.stringify(
       {
@@ -51,6 +81,9 @@ async function main() {
         activityItems: activityView.activity.length,
         marketDetailState: marketDetail.market.scanState,
         summaryMarketCount: summaryJson.stats?.monitoredMarkets ?? null,
+        marketObservationsAllTime: marketObservations.allTime,
+        marketObservationsLast24Hours: marketObservations.last24Hours,
+        successfulMarketScans: marketObservations.successfulScans,
         apiMarketsCount: Array.isArray(marketsJson.markets) ? marketsJson.markets.length : null,
         apiMarketId: marketJson.market?.id ?? null,
         apiEvidenceCount: Array.isArray(evidenceJson.evidence) ? evidenceJson.evidence.length : null,
