@@ -5,6 +5,9 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Prediction Signal",
   description: "Limitless Exchange Base prediction-market scanner for fair-value drift, scanner signals, reason codes, and fast trade triage.",
+  other: {
+    "base:app_id": "69b7f2353371bf602acd7d66",
+  },
 };
 
 export default function RootLayout({
